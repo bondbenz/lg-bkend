@@ -22,9 +22,13 @@ async function insertText(req, res, next) {
 
 async function getTexts(req, res, next) {
     const dbConnect = dbo.getDb();
+    const limit = parseInt(req.query.limit) || 1;
+    const page = (parseInt(req.query.page) - 1) * limit || 0;
     dbConnect
         .collection("texts")
-        .find({}).limit(50)
+        .find({})
+        .skip(page)
+        .limit(limit)
         .toArray(function (err, result) {
             if (err) {
                 return res.status(400).send("Error fetching listings!");
