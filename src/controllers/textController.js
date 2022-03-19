@@ -90,8 +90,23 @@ async function updateText(req, res, next) {
 
 }
 
+async function fetchTotalWords(req, res, next){
+    let textDocument = false;
+    await helper.getText(req.params.textId).then(result => {
+        textDocument = result;
+    });
+    if (!textDocument) return res.status(400).send('Text not found.');
+    const totalWords = {
+        totalWordsAr: textDocument.text_ar.split(' ').length,
+        totalWordsEn: textDocument.text_en.split(' ').length,
+        totalWordsFr: textDocument.text_fr.split(' ').length,
+    }
+    res.json(totalWords);
+}
+
 module.exports = {
     getTexts,
     insertText,
     updateText,
+    fetchTotalWords,
 }

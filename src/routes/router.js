@@ -6,6 +6,7 @@ const textController = require('../controllers/textController.js');
 router.get("/text", textController.getTexts);
 router.post("/text", textController.insertText);
 router.put("/text/:textId", textController.updateText);
+router.get("/text/:textId/count", textController.fetchTotalWords);
 
 router.get('/test', (req, res) => {
     res.send('Birds home page')
