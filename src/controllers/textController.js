@@ -1,13 +1,13 @@
 const dbo = require('../configs/db.config.js');
 const helper = require('../services/text.service.js');
-var ObjectId = require('mongodb').ObjectId; 
+var ObjectId = require('mongodb').ObjectId;
 
 async function insertText(req, res, next) {
     const dbConnect = dbo.getDb();
     const textDocument = {
-        text_ar: req.body.text_ar || 'None',
-        text_fr: req.body.text_fr || 'None',
-        text_en: req.body.text_en || 'None',
+        text_ar: req.body.text_ar || '',
+        text_fr: req.body.text_fr || '',
+        text_en: req.body.text_en || '',
         state: 'draft'
     }
     dbConnect
@@ -62,27 +62,32 @@ async function updateText(req, res, next) {
                 if (req.body.state !== 'submitted') return res.status(400).send('Bad state provided.');
                 break;
             default:
-                return res.status(400).send('Invalid state provided.')
+                return;
         }
     }
 
+    
     const textQuery = { _id: ObjectId(req.params.textId) };
-    const updates = {
-        $set: {
-            state: req.body.state
-        }
+    let updates = {
+        text_ar: req.body.text_ar,
+        text_fr: req.body.text_fr,
+        text_en: req.body.text_en,
+        state: req.body.state,
     };
+    
+    // Clean body from undefined values
+    Object.keys(updates).forEach(key => updates[key] === undefined && delete updates[key]);
 
     dbConnect
-        .collection("listingsAndReviews")
-        .updateOne(textQuery, updates, function (err, _result) {
+        .collection("texts")
+        .updateOne(textQuery, { $set: updates }, function (err, _result) {
             if (err) {
-                res.status(400).send(`Error updating likes on listing with id ${listingQuery.id}!`);
+                res.status(400).send(`Error updating text  with id ${textQuery._id}!`);
             } else {
                 res.status(204).send('ok');
             }
         });
-    
+
 }
 
 module.exports = {
