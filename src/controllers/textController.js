@@ -104,9 +104,34 @@ async function fetchTotalWords(req, res, next){
     res.json(totalWords);
 }
 
+async function fetchTotalWordsLanguage(req, res, next) {
+    let textDocument = false;
+    let totalWords = 0;
+    await helper.getText(req.params.textId).then(result => {
+        textDocument = result;
+    });
+    if (!textDocument) return res.status(400).send('Text not found.');
+    switch (req.params.language) {
+        case 'ar':
+            totalWords = textDocument.text_ar.split(' ').length;
+            break;
+        case 'en':
+            totalWords = textDocument.text_en.split(' ').length;
+            break
+        case 'fr':
+            totalWords = textDocument.text_fr.split(' ').length;
+            break;
+        default:
+            return;
+    }
+    res.json({totalWords: totalWords});
+}
+
+
 module.exports = {
     getTexts,
     insertText,
     updateText,
     fetchTotalWords,
+    fetchTotalWordsLanguage,
 }
