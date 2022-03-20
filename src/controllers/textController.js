@@ -17,7 +17,6 @@ async function insertText(req, res, next) {
             if (err) {
                 res.status(400).send("Error inserting text!");
             } else {
-                console.log(`Added a new text with id ${result.insertedId}`);
                 res.status(204).send(`Added a new text with id ${result.insertedId}`);
             }
         });
@@ -67,7 +66,7 @@ async function updateText(req, res, next) {
         }
     }
 
-    
+
     const textQuery = { _id: ObjectId(req.params.textId) };
     let updates = {
         text_ar: req.body.text_ar,
@@ -75,7 +74,7 @@ async function updateText(req, res, next) {
         text_en: req.body.text_en,
         state: req.body.state,
     };
-    
+
     // Clean body from undefined values
     Object.keys(updates).forEach(key => updates[key] === undefined && delete updates[key]);
 
@@ -91,7 +90,7 @@ async function updateText(req, res, next) {
 
 }
 
-async function fetchTotalWords(req, res, next){
+async function fetchTotalWords(req, res, next) {
     let textDocument = false;
     await helper.getText(req.params.textId).then(result => {
         textDocument = result;
@@ -125,7 +124,7 @@ async function fetchTotalWordsLanguage(req, res, next) {
         default:
             return;
     }
-    res.json({totalWords: totalWords});
+    res.json({ totalWords: totalWords });
 }
 
 async function fetchMostOccurent(req, res, next) {
@@ -143,6 +142,33 @@ async function fetchMostOccurent(req, res, next) {
     res.json(mostOccurrent);
 }
 
+
+async function searchText(req, res, next) {
+    const dbConnect = dbo.getDb();
+    const query = req.query.q;
+    if (!query) return res.status(400).send('Please specify your query paramater.');
+
+    dbConnect.
+        collection('texts').
+        aggregate([
+            {
+                $search: {
+                    "text": {
+                        "query": query,
+                        "path": ["text_ar", "text_fr", "text_en"],
+                        "fuzzy": {}
+                    }
+
+                }
+
+            }
+        ]).
+        toArray(function (err, result) {
+            if (err) res.status(400).send(err);
+            else res.json(result);
+        })
+}
+
 module.exports = {
     getTexts,
     insertText,
@@ -150,4 +176,5 @@ module.exports = {
     fetchTotalWords,
     fetchTotalWordsLanguage,
     fetchMostOccurent,
+    searchText
 }
