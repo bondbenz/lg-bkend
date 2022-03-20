@@ -8,6 +8,7 @@ router.post("/text", textController.insertText);
 router.put("/text/:textId", textController.updateText);
 router.get("/text/:textId/count", textController.fetchTotalWords);
 router.get("/text/:textId/count/:language", textController.fetchTotalWordsLanguage);
+router.get("/text/:textId/mostOccurrent", textController.fetchMostOccurent);
 
 router.get('/test', (req, res) => {
     res.send('Birds home page')

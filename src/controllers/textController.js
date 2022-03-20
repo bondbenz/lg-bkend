@@ -1,5 +1,6 @@
 const dbo = require('../configs/db.config.js');
 const helper = require('../services/text.service.js');
+const utils = require('../utils/helper.js');
 var ObjectId = require('mongodb').ObjectId;
 
 async function insertText(req, res, next) {
@@ -82,7 +83,7 @@ async function updateText(req, res, next) {
         .collection("texts")
         .updateOne(textQuery, { $set: updates }, function (err, _result) {
             if (err) {
-                res.status(400).send(`Error updating text  with id ${textQuery._id}!`);
+                res.status(400).send(`Error updating text with id ${textQuery._id}!`);
             } else {
                 res.status(204).send('ok');
             }
@@ -127,6 +128,20 @@ async function fetchTotalWordsLanguage(req, res, next) {
     res.json({totalWords: totalWords});
 }
 
+async function fetchMostOccurent(req, res, next) {
+    let textDocument = false;
+    await helper.getText(req.params.textId).then(result => {
+        textDocument = result;
+    });
+    if (!textDocument) return res.status(400).send('Text not found.');
+
+    const mostOccurrent = {
+        mostOccurrentAr: utils.mostOccurrentWord(textDocument.text_ar),
+        mostOccurrentEn: utils.mostOccurrentWord(textDocument.text_en),
+        mostOccurrentFr: utils.mostOccurrentWord(textDocument.text_fr),
+    }
+    res.json(mostOccurrent);
+}
 
 module.exports = {
     getTexts,
@@ -134,4 +149,5 @@ module.exports = {
     updateText,
     fetchTotalWords,
     fetchTotalWordsLanguage,
+    fetchMostOccurent,
 }
